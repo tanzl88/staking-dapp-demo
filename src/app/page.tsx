@@ -68,6 +68,7 @@ export default function StakingComponent() {
     );
   }
 
+  // @ts-ignore
   return (
     <div style={{
       display: 'flex',
@@ -82,13 +83,13 @@ export default function StakingComponent() {
         <p>
           Balance: {balance?.data?.formatted} {balance?.data?.symbol}
         </p>
-        <p>Amount staked: {toWei(stakedAmount?.data?.toString(10))}</p>
+        <p>Amount staked: {toWei(stakedAmount?.data?.toString() as string)}</p>
 
         <br/>
         <br/>
 
         {
-          stakedAmount?.data.toString() !== '0' ?
+          stakedAmount?.data?.toString() !== '0' ?
             <WithdrawInput setRefresh={setRefresh}/> :
             <StakeInput setRefresh={setRefresh}/>
         }
