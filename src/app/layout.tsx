@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className} style={{padding: '20px'}}>
+      <body className={inter.className} style={{padding: '20px', height: '100vh'}}>
         <Web3ModalProvider>{children}</Web3ModalProvider>
       </body>
     </html>

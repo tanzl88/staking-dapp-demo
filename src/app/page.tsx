@@ -69,24 +69,31 @@ export default function StakingComponent() {
   }
 
   return (
-    <div>
-      <h1>Staking and Withdrawal</h1>
-      <p>Chain: {chain?.id}</p>
-      <p>Your address: {address}</p>
-      <p>
-        Balance: {balance?.data?.formatted} {balance?.data?.symbol}
-      </p>
-      <p>Amount staked: {toWei(stakedAmount?.data?.toString(10))}</p>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100%'
+    }}>
+      <div style={{textAlign: 'center'}}>
+        <h1>Staking and Withdrawal</h1>
+        <p>Chain: {chain?.id}</p>
+        <p>Your address: {address}</p>
+        <p>
+          Balance: {balance?.data?.formatted} {balance?.data?.symbol}
+        </p>
+        <p>Amount staked: {toWei(stakedAmount?.data?.toString(10))}</p>
 
-      <br/>
-      <br/>
+        <br/>
+        <br/>
 
-      {
-        stakedAmount?.data.toString() !== '0' ?
-          <WithdrawInput setRefresh={setRefresh} /> :
-          <StakeInput setRefresh={setRefresh} />
-      }
-</div>
-)
-  ;
+        {
+          stakedAmount?.data.toString() !== '0' ?
+            <WithdrawInput setRefresh={setRefresh}/> :
+            <StakeInput setRefresh={setRefresh}/>
+        }
+      </div>
+    </div>
+  )
+    ;
 }
