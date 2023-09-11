@@ -1,64 +1,55 @@
-'use client';
+"use client";
 
-import React, {useState, useEffect} from 'react';
-import Web3 from 'web3';
-import { useAccount, usePrepareContractWrite, useContractWrite, useContractRead } from 'wagmi';
-import StakingContractABI from '../ABI/StakingContract.json';
-import {ADDRESSES} from "@/app/addresses";
+import React, { useState, useEffect } from "react";
+import { utils } from "web3";
+import { usePrepareContractWrite, useContractWrite } from "wagmi";
+import StakingContractABI from "../ABI/StakingContract.json";
+import { ADDRESSES } from "@/app/addresses";
 
-export default function WithdrawInput({
-  stakedAmount
-}) {
-  const [web3, setWeb3] = useState(null);
-  const { address, isConnected } = useAccount();
+export default function WithdrawInput({ setRefresh, stakedAmount }: { setRefresh: Function, stakedAmount: BigInt }) {
+    const { config: withdrawContractWriteConfig } = usePrepareContractWrite({
+        address: ADDRESSES.StakingContract,
+        abi: StakingContractABI,
+        functionName: "withdraw",
+        args: [],
+    });
+    const {
+        write: withdraw,
+        isIdle: withdrawIsIdle,
+        isLoading: withdrawIsLoading,
+        isSuccess: withdrawIsSuccess,
+    } = useContractWrite(withdrawContractWriteConfig);
 
-  const { config: withdrawContractWriteConfig } = usePrepareContractWrite({
-    address: ADDRESSES.StakingContract,
-    abi: StakingContractABI,
-    functionName: 'withdraw',
-    args: [],
-  });
-  const { write: withdraw, isIdle: withdrawIsIdle, isLoading: withdrawIsLoading, isSuccess: withdrawIsSuccess }= useContractWrite(withdrawContractWriteConfig);
+    useEffect(() => {
+        if (withdrawIsSuccess) {
+            setRefresh(true);
+        }
+    }, [withdrawIsSuccess]);
 
-  useEffect(() => {
-    const initWeb3 = async () => {
-      if (window.ethereum) {
-        const web3Instance = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        setWeb3(web3Instance);
-      }
+    const handleWithdraw = async () => {
+        withdraw?.();
     };
-    initWeb3();
-  }, []);
 
-  useEffect(() => {
-    if (withdrawIsSuccess) {
-      stakedAmount?.refetch();
-    }
-  }, [withdrawIsSuccess]);
+    const toWei = (amount: string) => {
+        if (!amount) return null;
 
-  const handleWithdraw = async () => {
-    if (!web3) {
-      return;
-    }
+        return utils.fromWei(amount, "ether");
+    };
 
-    withdraw?.();
-  };
-
-  const toWei = (amount: string) => {
-    if (!amount) return null;
-
-    return web3?.utils?.fromWei(amount, 'ether');
-  }
-
-  return (
-    <div>
-      <h2>Withdraw</h2>
-      <p>Amount staked: {toWei(stakedAmount?.data?.toString(10))}</p>
-      <button onClick={handleWithdraw} style={{padding: '10px 20px', marginTop: '10px', background: '#ef5e91'}}>Withdraw</button>
-      {
-        withdrawIsLoading ? <p>Withdrawing...</p> : (withdrawIsIdle ? null : (withdrawIsSuccess ? <p>Withdraw successful</p> : <p>Withdraw failed</p>))
-      }
-    </div>
-  );
-};
+    return (
+        <div>
+            <h2>Withdraw</h2>
+            <p>Amount staked: {toWei(stakedAmount?.toString(10))}</p>
+            <button onClick={handleWithdraw} style={{ padding: "10px 20px", marginTop: "10px", background: "#ef5e91" }}>
+                Withdraw
+            </button>
+            {withdrawIsLoading ? (
+                <p>Withdrawing...</p>
+            ) : withdrawIsIdle ? null : withdrawIsSuccess ? (
+                <p>Withdraw successful</p>
+            ) : (
+                <p>Withdraw failed</p>
+            )}
+        </div>
+    );
+}
