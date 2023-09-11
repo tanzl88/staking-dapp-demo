@@ -1,95 +1,81 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
 
-export default function Home() {
+import React, {useState, useEffect} from 'react';
+import { Web3Button } from "@web3modal/react";
+import StakeInput from './stake';
+import WithdrawInput from './withdraw';
+import Web3 from 'web3';
+import { useAccount, useBalance, useNetwork, useContractRead } from 'wagmi';
+import StakingContractABI from '../ABI/StakingContract.json';
+import {ADDRESSES} from "@/app/addresses";
+
+export default function StakingComponent() {
+  const [web3, setWeb3] = useState(null);
+  const { chain, chains } = useNetwork();
+  const { address, isConnected } = useAccount();
+  const balance = useBalance({
+    address: address,
+    token: ADDRESSES.MockToken
+  });
+
+  const isWhitelisted = useContractRead({
+    address: ADDRESSES.StakingContract,
+    abi: StakingContractABI,
+    functionName: 'isWhitelisted',
+    args: [address],
+  });
+
+  const stakedAmount = useContractRead({
+    address: ADDRESSES.StakingContract,
+    abi: StakingContractABI,
+    functionName: 'getStakedAmount',
+    args: [address],
+  });
+
+  useEffect(() => {
+
+  }, []);
+
+  useEffect(() => {
+    const initWeb3 = async () => {
+      if (window.ethereum) {
+        const web3Instance = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        setWeb3(web3Instance);
+      }
+    };
+    initWeb3();
+  }, []);
+
+
+  if (!isConnected) {
+    return <div>
+      <Web3Button />
+    </div>;
+  }
+
+  if (isWhitelisted?.data !== true) {
+    return <div>
+      <p>You are not whitelisted</p>
+    </div>;
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <h1>Staking and Withdrawal</h1>
+      <p>Chain: {chain?.id}</p>
+      <p>Your address: {address}</p>
+      <p>Balance: {balance?.data?.formatted} {balance?.data?.symbol}</p>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <br />
+      <br />
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+      <StakeInput stakedAmount={stakedAmount} />
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+      <br />
+      <br />
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+      <WithdrawInput stakedAmount={stakedAmount} />
+    </div>
+  );
+};

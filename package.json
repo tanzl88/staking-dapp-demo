@@ -12,11 +12,22 @@
     "@types/node": "20.6.0",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
+    "@web3modal/ethereum": "^2.7.1",
+    "@web3modal/react": "^2.7.1",
+    "encoding": "^0.1.13",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
+    "lokijs": "1.x",
     "next": "13.4.19",
+    "pino-pretty": "^10.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "viem": "^1.10.9",
+    "wagmi": "^1.4.1",
+    "web3": "^4.1.1"
+  },
+  "devDependencies": {
+    "eslint-config-prettier": "^9.0.0"
   }
 }
